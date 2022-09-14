@@ -59,14 +59,6 @@ func readJsonFile(path string) (*wire.File, error) {
 	}
 	defer fd.Close()
 
-	// fd, err := os.ReadFile(path)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("problem reading %s: %v", path, err)
-	// }
-	// str := string(fd)
-	// str2 := json.Encoder(str)
-	// println(str2)
-
 	bs, err := io.ReadAll(fd)
 	if err != nil {
 		return nil, fmt.Errorf("problem reading %s: %v", path, err)

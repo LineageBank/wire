@@ -25,7 +25,7 @@ func init() {
 		fmt.Println("")
 		fmt.Println("")
 		fmt.Println("Commands: ")
-		fmt.Printf("  %s -reformat=json first.ach", programName)
+		fmt.Printf("  %s -reformat=json wire.txt", programName)
 		fmt.Println("  [ Convert an incoming Wire file into json format ]")
 
 		fmt.Println("")
