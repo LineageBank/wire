@@ -5,10 +5,13 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/moov-io/wire"
 )
@@ -18,20 +21,14 @@ func reformat(as string, filepath string) error {
 		return err
 	}
 
-	file, err := readIncomingFile(filepath)
+	file, err := readWireFile(filepath)
 	if err != nil {
 		return err
 	}
 
 	switch as {
-	// case "json":
-	// 	w := wire.NewWriter(os.Stdout)
-	// 	if err := w.Write(file); err != nil {
-	// 		return err
-	// 	}
 
 	case "json":
-		// if err := json.RawMessage(os.Stdout).Encode(file); err != nil {
 		if err := json.NewEncoder(os.Stdout).Encode(file); err != nil {
 			return err
 		}
@@ -42,27 +39,60 @@ func reformat(as string, filepath string) error {
 	return nil
 }
 
-func readIncomingFile(path string) (*wire.File, error) {
-	file, err := readJsonFile(path)
-	if file != nil && err == nil {
-		return file, nil
-	}
-
-	return nil, fmt.Errorf("unable to read %s:\n %v", path, err)
-}
-
-func readJsonFile(path string) (*wire.File, error) {
+func readWireFile(path string) (*wire.File, error) {
 
 	fd, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("problem opening %s: %v", path, err)
+		fmt.Printf("problem opening %s: %v", path, err)
 	}
 	defer fd.Close()
 
-	bs, err := io.ReadAll(fd)
+	r4 := bufio.NewReader(fd)
+	b4, err := r4.Peek(r4.Size())
 	if err != nil {
-		return nil, fmt.Errorf("problem reading %s: %v", path, err)
+		if err == io.EOF {
+			fmt.Println("")
+		} else {
+			fmt.Printf("problem opening %s: %v", path, err)
+		}
 	}
 
-	return wire.FileFromJSON(bs)
+	parsed, err := parseContents(string(b4))
+	if err != nil {
+		fmt.Printf("Unable to parse file %s: %v", path, err)
+	}
+
+	pretty, err := prettyJson(parsed)
+	if err != nil {
+		fmt.Printf("unable to convert wire file to json %s\n", err)
+	}
+
+	return wire.FileFromJSON(pretty)
+
+}
+
+func parseContents(input string) (string, error) {
+	r := strings.NewReader(input)
+	file, err := wire.NewReader(r).Read()
+	if err != nil {
+		return "", err
+	}
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(file); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+func prettyJson(input string) ([]byte, error) {
+	var raw interface{}
+	if err := json.Unmarshal([]byte(input), &raw); err != nil {
+		return nil, err
+	}
+	pretty, err := json.MarshalIndent(raw, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	return pretty, nil
 }
