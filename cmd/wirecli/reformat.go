@@ -53,7 +53,7 @@ func readWireFile(path string) (*wire.File, error) {
 		if err == io.EOF {
 			fmt.Println("")
 		} else {
-			fmt.Printf("problem opening %s: %v", path, err)
+			fmt.Printf("problem reading %s: %v", path, err)
 		}
 	}
 

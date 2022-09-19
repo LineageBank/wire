@@ -23,7 +23,7 @@ func dumpFiles(paths []string) error {
 
 	for i := range files {
 		if i > 0 && len(files) > 1 {
-			fmt.Println("") // extra newline between multiple ACH files
+			fmt.Println("") // extra newline between multiple files
 		} else {
 			fmt.Printf("nil Wire file in position %d\n", i)
 		}

@@ -2,6 +2,11 @@
 // Use of this source code is governed by an Apache License
 // license that can be found in the LICENSE file.
 
+/*
+ * to run from cli, make sure terminal is in cmd/wirecli
+ * run: go run main.go reformat.go describe.go -reformat=json the_fedwire_file_name.txt
+ */
+
 package main
 
 import (
